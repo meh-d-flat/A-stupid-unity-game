@@ -31,13 +31,19 @@ public class RandomAction : MonoBehaviour
 	void Update()
 	{
 		if (!MenuCanvas.GamePaused)
+		{
 			RAUpdate1();
+			RAUpdate2();
+		}
 	}
 
 	void LateUpdate()
 	{
-		if (!MenuCanvas.GamePaused)
-			RAUpdate();
+		//if (!MenuCanvas.GamePaused)
+		//{
+		//	RAUpdate1();
+		//	RAUpdate2();
+		//}
 	}
 
 	public void ActionAdd(Action a) {
@@ -50,7 +56,7 @@ public class RandomAction : MonoBehaviour
 		action = null;
 	}
 
-	public void RAUpdate1()
+	void RAUpdate1()
 	{
 		if (!counting)
 		{
@@ -59,7 +65,7 @@ public class RandomAction : MonoBehaviour
 			counting = true;
 		}
 	}
-	public void RAUpdate()
+	void RAUpdate2()
 	{
 		if (currentFrameNumber++ == randomNumOfFrames)
 		{

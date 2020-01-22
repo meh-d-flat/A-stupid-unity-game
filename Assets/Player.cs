@@ -8,14 +8,16 @@ public class Player : MonoBehaviour
     public float limitSpeed = 3.75f;
     public float mouseSensivity = 3f;
     public bool invertMouse;
+    public string collidingTagName = "block";
 
     Camera mainCamera;
     Rigidbody rigidBody;
     SphereCollider sphereCollider;
     ColliderSetup collSetup;
-    Vector3 initialPosition;
-    Vector2 movement, mouseLook;
     RandomAction randomAction;
+    Renderer rendererBall;
+    Vector2 movement, mouseLook;
+    Vector3 initialPosition;
 
     float distance = 5f;
 
@@ -23,15 +25,15 @@ public class Player : MonoBehaviour
     readonly float cameraAngleLimitYMin;
     readonly float cameraAngleLimitYMax = 75;
 
-    void ColorChange()
-    {
-        gameObject.GetComponent<Renderer>().material.color = UnityEngine.Random.ColorHSV();
+    void ColorChange() {
+        rendererBall.material.color = UnityEngine.Random.ColorHSV();
     }
 
     void Start()
     {
         mainCamera = Camera.main;
         rigidBody = gameObject.GetComponent<Rigidbody>();
+        rendererBall = gameObject.GetComponent<Renderer>();
 
         sphereCollider = GetComponent<SphereCollider>();
         sphereCollider.material.bounciness = 0.3f;
@@ -52,15 +54,22 @@ public class Player : MonoBehaviour
         CallResetPosition();
     }
 
-    void Update()
-    {
-
-    }
+    void Update() { }
 
     void LateUpdate()
     {
         CameraWork();
         MenuCall();
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        Collider coll = collision.contacts[0].otherCollider;
+        if (coll.gameObject.tag == collidingTagName)
+        {
+            var renderer = coll.gameObject.GetComponent<Renderer>();
+            renderer.material.color = rendererBall.material.color;
+        }
     }
 
     void MenuCall()
@@ -141,8 +150,7 @@ public class Player : MonoBehaviour
             rigidBody.AddForce(new Vector3(0f, 50f * jumpSpeedMult/* * moveSpeed*/, 0f)/* * moveSpeed*/);
     }
 
-    bool CheckVelocity()
-    {
+    bool CheckVelocity() {
         return rigidBody.velocity.x < limitSpeed | rigidBody.velocity.z < limitSpeed;
     }
 

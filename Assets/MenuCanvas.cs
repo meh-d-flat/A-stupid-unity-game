@@ -21,8 +21,8 @@ public class MenuCanvas : MonoBehaviour
     public void ChangeState()
     {
         gameObject.SetActive(!gameObject.activeSelf);
-        Time.timeScale = gameObject.activeSelf ? 0f : 1f;
         isPaused = gameObject.activeSelf;
+        Time.timeScale = gameObject.activeSelf ? 0f : 1f;//seems like it does not affect LateUpdate
     }
 
     void Awake() {
