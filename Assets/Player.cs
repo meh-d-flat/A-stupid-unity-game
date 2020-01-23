@@ -20,6 +20,7 @@ public class Player : MonoBehaviour
     Vector3 initialPosition;
 
     float distance = 5f;
+    float fallLimit = -10f;
 
     //NEVER USE CONSTANTS! USE READONLY INSTEAD
     readonly float cameraAngleLimitYMin;
@@ -48,11 +49,13 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
+        CheckFalling();
         ClampVelocity();
         Move();
         CallJump();
         CallResetPosition();
     }
+
 
     void Update() { }
 
@@ -121,6 +124,12 @@ public class Player : MonoBehaviour
         Quaternion rotation = Quaternion.Euler(mouseLook.y, mouseLook.x, 0f);
         mainCamera.transform.position = transform.position + rotation * direction;
         mainCamera.transform.LookAt(transform.position);
+    }
+
+    private void CheckFalling()
+    {
+        if (transform.position.y < fallLimit)
+            ResetPosition();
     }
 
     void CallResetPosition()
