@@ -10,11 +10,13 @@ public class MenuCanvas : MonoBehaviour
     Image panel;
     Button buttonResume, buttonQuit;
 
-    public static bool GamePaused {
+    public static bool GamePaused
+    {
         get { return isPaused; }
     }
 
-    public static MenuCanvas Getinstance() {
+    public static MenuCanvas Getinstance()
+    {
         return instance != null ? instance : null;
     }
 
@@ -25,7 +27,8 @@ public class MenuCanvas : MonoBehaviour
         Time.timeScale = gameObject.activeSelf ? 0f : 1f;//seems like it does not affect LateUpdate
     }
 
-    void Awake() {
+    void Awake()
+    {
         instance = this;
     }
 

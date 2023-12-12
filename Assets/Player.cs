@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -14,24 +15,27 @@ public class Player : MonoBehaviour
     Rigidbody rigidBody;
     SphereCollider sphereCollider;
     ColliderSetup collSetup;
-    RandomAction randomAction;
+    RandomActionLite2 randomAction;
     Renderer rendererBall;
+
     Vector2 movement, mouseLook;
     Vector3 initialPosition;
 
-    float distance = 5f;
-    float fallLimit = -10f;
+    float cameraDistance = 5f;
+    float fallYLimit = -10f;
 
     //NEVER USE CONSTANTS! USE READONLY INSTEAD
-    readonly float cameraAngleLimitYMin;
-    readonly float cameraAngleLimitYMax = 75;
+    readonly float cameraAngleLimitYMin = 0f;
+    readonly float cameraAngleLimitYMax = 75f;
 
-    void ColorChange() {
+    void ColorChange()
+    {
         rendererBall.material.color = UnityEngine.Random.ColorHSV();
     }
 
     void Start()
     {
+        //MBManager.ActionLateUpdate.Add(new MBManager.ActionNu(() => Debug.Log("LateUpdate")));
         mainCamera = Camera.main;
         rigidBody = gameObject.GetComponent<Rigidbody>();
         rendererBall = gameObject.GetComponent<Renderer>();
@@ -43,7 +47,7 @@ public class Player : MonoBehaviour
 
         initialPosition = transform.position;
 
-        randomAction = RandomAction.CreateInstance(gameObject, 120, 300);
+        randomAction = RandomActionLite2.CreateInstance(gameObject, 1, 5);//120 300
         randomAction.ActionAdd(ColorChange);
     }
 
@@ -56,9 +60,6 @@ public class Player : MonoBehaviour
         CallResetPosition();
     }
 
-
-    void Update() { }
-
     void LateUpdate()
     {
         CameraWork();
@@ -68,7 +69,7 @@ public class Player : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         Collider coll = collision.contacts[0].otherCollider;
-        if (coll.gameObject.tag == collidingTagName)
+        if (coll.gameObject.CompareTag(collidingTagName))
         {
             var renderer = coll.gameObject.GetComponent<Renderer>();
             renderer.material.color = rendererBall.material.color;
@@ -83,19 +84,15 @@ public class Player : MonoBehaviour
 
     void Move()
     {
-        movement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-
-        Vector3 front = new Vector3(mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
-        Vector3 side = new Vector3(mainCamera.transform.right.x, 0, mainCamera.transform.right.z);
-        //Vector3 direction = (front + side).normalized;
-
-        //rigidBody.AddForce((front * movement.y) + (side * movement.x) * moveSpeed);
-        //rigidBody.AddForce((mainCamera.transform.forward * movement.y) + (mainCamera.transform.right * movement.x) * moveSpeed);
-
-        //Vector3 direction = (movement.y * front.normalized/*mainCamera.transform.forward*/) + (movement.x * side.normalized/*mainCamera.transform.right*/);
-        Vector3 direction = ((movement.y * front) + (movement.x * side)).normalized;
-        if (CheckVelocity() && collSetup.IsColliding)
-            rigidBody.AddForce(direction * moveSpeed * movement.magnitude);
+        if (Input.GetAxis("Horizontal") != 0 | Input.GetAxis("Vertical") != 0)
+        {
+            movement = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            Vector3 front = new Vector3(mainCamera.transform.forward.x, 0, mainCamera.transform.forward.z);
+            Vector3 side = new Vector3(mainCamera.transform.right.x, 0, mainCamera.transform.right.z);
+            Vector3 direction = ((movement.y * front) + (movement.x * side)).normalized;
+            if (CheckVelocity() && collSetup.IsColliding)
+                rigidBody.AddForce(direction * moveSpeed * movement.magnitude);
+        }
     }
 
     void CameraWork()
@@ -113,14 +110,14 @@ public class Player : MonoBehaviour
         {
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
-            distance += Input.GetAxis("Mouse X") * Time.deltaTime * 10f;
-            distance = Mathf.Clamp(distance, 2f, 5f);
+            cameraDistance += Input.GetAxis("Mouse X") * Time.deltaTime * 10f;
+            cameraDistance = Mathf.Clamp(cameraDistance, 2f, 5f);
         }
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
 
-        Vector3 direction = new Vector3(0f, 0f, -distance);
+        Vector3 direction = new Vector3(0f, 0f, -cameraDistance);
         Quaternion rotation = Quaternion.Euler(mouseLook.y, mouseLook.x, 0f);
         mainCamera.transform.position = transform.position + rotation * direction;
         mainCamera.transform.LookAt(transform.position);
@@ -128,7 +125,7 @@ public class Player : MonoBehaviour
 
     private void CheckFalling()
     {
-        if (transform.position.y < fallLimit)
+        if (transform.position.y < fallYLimit)
             ResetPosition();
     }
 
@@ -159,7 +156,8 @@ public class Player : MonoBehaviour
             rigidBody.AddForce(new Vector3(0f, 50f * jumpSpeedMult/* * moveSpeed*/, 0f)/* * moveSpeed*/);
     }
 
-    bool CheckVelocity() {
+    bool CheckVelocity()
+    {
         return rigidBody.velocity.x < limitSpeed | rigidBody.velocity.z < limitSpeed;
     }
 

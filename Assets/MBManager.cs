@@ -24,18 +24,26 @@ public class MBManager : MonoBehaviour
     public static ActionList ActionOnDisable { get { return actOnDisable; } }
     public static ActionList ActionOnDestroy { get { return actOnDestroy; } }
 
-    void FixedUpdate() {
+    void FixedUpdate()
+    {
         actFixedUpdate.ActTheQueue();
     }
-    void Update() {
+
+    void Update()
+    {
         actUpdate.ActTheQueue();
     }
-    void LateUpdate() {
+
+    void LateUpdate()
+    {
         actLateUpdate.ActTheQueue();
     }
-    void OnGUI() {
+
+    void OnGUI()
+    {
         actOnGUI.ActTheQueue();
     }
+
     void OnApplicationFocus(bool focus)
     {
         if (focus)
@@ -43,13 +51,19 @@ public class MBManager : MonoBehaviour
         else
             actOnApplicationFocusOut.ActTheQueue();
     }
-    void OnApplicationQuit() {
+
+    void OnApplicationQuit()
+    {
         actOnApplicationQuit.ActTheQueue();
     }
-    void OnDisable() {
+
+    void OnDisable()
+    {
         actOnDisable.ActTheQueue();
     }
-    void OnDestroy() {
+
+    void OnDestroy()
+    {
         actOnDestroy.ActTheQueue();
     }
 
@@ -57,36 +71,56 @@ public class MBManager : MonoBehaviour
     {
         Action action;
 
-        public ActionNu() {
-            action = PlaceholderStub;
+        public ActionNu()
+        {
+            action = null;
         }
-        public ActionNu(Action a) {
+
+        public ActionNu(Action a)
+        {
             action = a;
         }
-        public void ActionSet(Action a) {
+
+        public void ActionSet(Action a)
+        {
             action = a;
         }
-        public void ActionClear() {
-            action = PlaceholderStub;
+
+        public void ActionClear()
+        {
+            action = null;
         }
-        public void Invoke() {
-            action.Invoke();
+
+        public bool Invoke()
+        {
+            if (action != null)
+            {
+                action.Invoke();
+                return true;
+            }
+            else
+                return false;
         }
-        public Delegate[] GetInvocationList() {
+
+        public Delegate[] GetInvocationList()
+        {
             return action.GetInvocationList();
         }
-        void PlaceholderStub() { }
+
+        //void PlaceholderStub() { }
     }
 
     public class ActionList
     {
         List<ActionNu> list;
 
-        public ActionList() {
+        public ActionList()
+        {
             list = new List<ActionNu>();
         }
 
-        public bool Add(ActionNu a) {
+        public bool Add(ActionNu a)
+        {
             if (!list.Exists(x => x == a))
             {
                 list.Add(a);
@@ -96,11 +130,18 @@ public class MBManager : MonoBehaviour
                 return false;
         }
 
-        public bool Remove(ActionNu a) {
-            return list.Remove(a);
+        //public bool Remove(ActionNu a)
+        //{
+        //    return list.Remove(a);
+        //}
+
+        public bool Remove(ActionNu a)
+        {
+            return list.Exists(x => x == a) ? list.Remove(a) : false;
         }
 
-        public void ActTheQueue() {
+        public void ActTheQueue()
+        {
             list.ForEach(a => a.Invoke());
         }
 
